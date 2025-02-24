@@ -11,7 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -29,9 +28,8 @@ jobs:
       run: mvn test
 
   package:
-    needs: build  # 🚀 Exécute ce job SEULEMENT après "build"
+    needs: build
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -45,18 +43,17 @@ jobs:
     - name: Package the application
       run: mvn package
       env:
-       JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
+        JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
 
     - name: Upload JAR artifact
       uses: actions/upload-artifact@v4
       with:
         name: app-jar
-        path: target/*.jar
+        path: target/calculator-0.0.1-SNAPSHOT.jar
 
   docker:
-    needs: package  # 🚀 Exécute ce job SEULEMENT après "package"
+    needs: package
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -67,9 +64,11 @@ jobs:
         name: app-jar
         path: target/
 
+    - name: Check downloaded artifact
+      run: ls -la target/
+
     - name: Build Docker image
-      run: |
-        docker build -t my-spring-app:latest .
+      run: docker build -t my-spring-app:latest .
 
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
