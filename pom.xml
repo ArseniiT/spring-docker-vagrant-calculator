@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.gretadevops</groupId>
-	<artifactId>calculatord</artifactId>
+	<artifactId>calculator</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>calculatord</name>
+	<name>calculator</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
