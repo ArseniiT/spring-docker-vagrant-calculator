@@ -3,7 +3,8 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /vagrant
 
 # Copy the pre-built JAR file into the container
-COPY ./build/libs/calculator-0.0.1-SNAPSHOT.jar calculator-0.0.1-SNAPSHOT.jar
+# COPY ./build/libs/calculator-0.0.1-SNAPSHOT.jar calculator-0.0.1-SNAPSHOT.jar
+COPY target/calculator-0.0.1-SNAPSHOT.jar calculator-0.0.1-SNAPSHOT.jar
 
 # Specify the command to run the application
 ENTRYPOINT ["java", "-jar", "calculator-0.0.1-SNAPSHOT.jar"]
