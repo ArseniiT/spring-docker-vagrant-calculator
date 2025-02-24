@@ -107,6 +107,7 @@ jobs:
               containers:
               - name: my-spring-app
                 image: localhost:5000/my-spring-app:latest
+                imagePullPolicy: Never
                 ports:
                 - containerPort: 8080
         ---
@@ -125,5 +126,7 @@ jobs:
         kubectl apply -f deployment.yaml
     - name: Check deployment
       run: |
-        kubectl get pods
-        kubectl get services
+        kubectl wait --for=condition=ready pod -l app=my-spring-app --timeout=60s
+        kubectl get pods -l app=my-spring-app
+        kubectl get services my-spring-app-service
+        minikube service my-spring-app-service --url
