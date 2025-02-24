@@ -88,6 +88,10 @@ jobs:
         minikube image load localhost:5000/my-spring-app:latest
     - name: Deploy to Minikube
       run: |
+        # remove the old deploy and service
+        kubectl delete deployment my-spring-app --ignore-not-found=true
+        kubectl delete service my-spring-app-service --ignore-not-found=true
+        
         # k8s deployment
         cat <<EOF > deployment.yaml
         apiVersion: apps/v1
