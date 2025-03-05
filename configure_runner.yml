@@ -1,0 +1,78 @@
+- name: Configure GitHub Runner on EC2
+  hosts: all
+  become: yes
+  vars:
+    github_runner_token: "xxxxxxxxxxxxxxxxxxxxxxxxxx"
+    github_repo_url: "https://github.com/ArseniiT/spring-docker-vagrant-calculator"
+    runner_version: "2.322.0"
+  tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - curl
+          - docker.io
+          - maven
+          - openjdk-17-jdk
+        state: present
+
+    - name: Start and enable Docker
+      ansible.builtin.systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add user to docker group
+      ansible.builtin.user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Create actions-runner directory
+      ansible.builtin.file:
+        path: /home/ubuntu/actions-runner
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Download GitHub Runner package
+      ansible.builtin.get_url:
+        url: "https://github.com/actions/runner/releases/download/v{{ runner_version }}/actions-runner-linux-x64-{{ runner_version }}.tar.gz"
+        dest: "/home/ubuntu/actions-runner/actions-runner-linux-x64-{{ runner_version }}.tar.gz"
+        mode: '0644'
+
+    - name: Extract GitHub Runner package
+      ansible.builtin.unarchive:
+        src: "/home/ubuntu/actions-runner/actions-runner-linux-x64-{{ runner_version }}.tar.gz"
+        dest: /home/ubuntu/actions-runner
+        remote_src: yes
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Configure GitHub Runner
+      ansible.builtin.shell: |
+        /home/ubuntu/actions-runner/config.sh \
+          --url {{ github_repo_url }} \
+          --token {{ github_runner_token }} \
+          --name aws-github-runner \
+          --unattended
+      args:
+        chdir: /home/ubuntu/actions-runner
+        creates: /home/ubuntu/actions-runner/.credentials
+
+    - name: Install GitHub Runner as a service
+      ansible.builtin.shell: |
+        /home/ubuntu/actions-runner/svc.sh install
+      args:
+        chdir: /home/ubuntu/actions-runner
+        creates: /etc/systemd/system/actions.runner.service
+
+    - name: Start and enable GitHub Runner service
+      ansible.builtin.systemd:
+        name: actions.runner.service
+        state: started
+        enabled: yes
